@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence version="2.1" xmlns="http://xmlns.jcp.org/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence http://xmlns.jcp.org/xml/ns/persistence/persistence_2_1.xsd">
+	<persistence-unit name="fb-crawler">
+		<class>br.ufu.facom.lsi.model.AvaliacaoFilme</class>
+		<class>br.ufu.facom.lsi.model.EstudaEm</class>
+		<class>br.ufu.facom.lsi.model.Filme</class>
+		<class>br.ufu.facom.lsi.model.Foto</class>
+		<class>br.ufu.facom.lsi.model.Livro</class>
+		<class>br.ufu.facom.lsi.model.ProgramaTv</class>
+		<class>br.ufu.facom.lsi.model.TrabalhaEm</class>
+		<class>br.ufu.facom.lsi.model.Usuariofoto</class>
+		<class>br.ufu.facom.lsi.model.CompartilhaPostagem</class>
+		<class>br.ufu.facom.lsi.model.LikePostagem</class>
+		<class>br.ufu.facom.lsi.model.Postagem</class>
+		<class>br.ufu.facom.lsi.model.Usuario</class>
+		<class>br.ufu.facom.lsi.model.Amizade</class>
+		<class>br.ufu.facom.lsi.model.Userconnection</class>
+		<class>br.ufu.facom.lsi.model.UserconnectionPK</class>
+	</persistence-unit>
+</persistence>

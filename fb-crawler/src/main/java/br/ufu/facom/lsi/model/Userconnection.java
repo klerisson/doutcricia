@@ -1,15 +1,16 @@
 package br.ufu.facom.lsi.model;
 
 import java.io.Serializable;
-import javax.persistence.*;
 
+import javax.persistence.*;
 
 /**
  * The persistent class for the userconnection database table.
  * 
  */
+
 @Entity
-@NamedQuery(name="Userconnection.findAll", query="SELECT u FROM Userconnection u")
+@NamedQuery(name = "Userconnection.findAll", query = "SELECT u FROM Userconnection u")
 public class Userconnection implements Serializable {
 	private static final long serialVersionUID = 1L;
 

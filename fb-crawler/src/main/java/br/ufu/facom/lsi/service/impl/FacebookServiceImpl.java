@@ -22,7 +22,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import br.ufu.facom.lsi.dto.jsongen.sharedposts.SharedPosts;
-import br.ufu.facom.lsi.dto.jsongen.videoratings.VideoRatings;
 import br.ufu.facom.lsi.exception.UserExecption;
 import br.ufu.facom.lsi.model.Amizade;
 import br.ufu.facom.lsi.model.EstudaEm;
@@ -30,6 +29,7 @@ import br.ufu.facom.lsi.model.LikePostagem;
 import br.ufu.facom.lsi.model.Postagem;
 import br.ufu.facom.lsi.model.TrabalhaEm;
 import br.ufu.facom.lsi.model.Usuario;
+import br.ufu.facom.lsi.repository.UserConnectionRepository;
 import br.ufu.facom.lsi.service.FacebookService;
 import br.ufu.facom.lsi.service.SocialContext;
 
@@ -41,6 +41,9 @@ public class FacebookServiceImpl implements FacebookService {
 
 	@Autowired
 	private RestTemplate restTemplate;
+	
+	@Autowired
+	private UserConnectionRepository userConnectionRepository;
 
 	public void getFriendList(SocialContext sc) {
 
@@ -169,7 +172,7 @@ public class FacebookServiceImpl implements FacebookService {
 		} catch (Exception e) {
 			logger.warn(
 					"Falha na extracao do local de estudo para o usuario id: "
-							+ u.getIdusuario(), e);
+							+ u.getTokenusuario(), e);
 		}
 
 		// TODO: Photos
@@ -264,7 +267,7 @@ public class FacebookServiceImpl implements FacebookService {
 		} catch (Exception e) {
 			logger.warn(
 					"Falha ao extrair postagens do usuario id: "
-							+ u.getIdusuario(), e);
+							+ u.getTokenusuario(), e);
 
 		}
 
@@ -273,14 +276,15 @@ public class FacebookServiceImpl implements FacebookService {
 
 		try {
 			// Video ratings
-			VideoRatings resultado = facebook.restOperations().getForObject(
-					"https://graph.facebook.com/video.rates", VideoRatings.class);
+			String accessToken = this.userConnectionRepository.findAccessTokenByUserId(u.getTokenusuario());
+			String resultado = facebook.restOperations().getForObject(
+					"https://graph.facebook.com/"+ u.getTokenusuario() +"/video.rates&access_token=" + accessToken, String.class);
 			
 			System.out.println(resultado);
 			// TODO gravar na base as avaliaçoes
 		} catch (Exception e) {
 			logger.warn("Falha ao gravar avaliacoes de video do usuario id: "
-					+ u.getIdusuario(), e);
+					+ u.getTokenusuario(), e);
 		}
 
 	}

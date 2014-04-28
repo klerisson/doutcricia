@@ -108,5 +108,9 @@ public class SocialContext implements ConnectionSignUp, SignInAdapter {
 	public Facebook getFacebook() {
 		return facebook;
 	}
-
+	
+	public UsersConnectionRepository getConnectionRepository() {
+		return connectionRepository;
+	}
+	
 }

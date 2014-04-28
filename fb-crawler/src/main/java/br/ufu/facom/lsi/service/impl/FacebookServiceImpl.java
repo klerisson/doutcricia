@@ -7,8 +7,7 @@ import java.util.List;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.FileSystemResource;
-import org.springframework.core.io.Resource;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.social.facebook.api.EducationEntry;
 import org.springframework.social.facebook.api.Facebook;
 import org.springframework.social.facebook.api.FacebookProfile;
@@ -35,7 +34,6 @@ import br.ufu.facom.lsi.repository.TrabalhaEmRepository;
 import br.ufu.facom.lsi.repository.UserConnectionRepository;
 import br.ufu.facom.lsi.repository.UsuarioRepository;
 import br.ufu.facom.lsi.service.FacebookService;
-import br.ufu.facom.lsi.service.SocialContext;
 
 @Service
 public class FacebookServiceImpl implements FacebookService {
@@ -61,9 +59,10 @@ public class FacebookServiceImpl implements FacebookService {
 	@Autowired
 	private LikePostagemRepository likePostagemRepository;
 
-	public void getFriendList(SocialContext sc) {
+	private void getFriendList(String accessToken) {
 
-		Facebook facebook = sc.getFacebook();
+		Facebook facebook = new FacebookTemplate(accessToken);
+		;
 		try {
 
 			List<FacebookProfile> friends = facebook.friendOperations()
@@ -88,289 +87,300 @@ public class FacebookServiceImpl implements FacebookService {
 
 	}
 
-	public void postPhotoAndTaggAllFriends(String accessToken) {
-
-		Facebook facebook = new FacebookTemplate(accessToken);
-		List<FacebookProfile> friends = facebook.friendOperations()
-				.getFriendProfiles();
-		try {
-
-			Resource photo = new FileSystemResource(
-					"D:\\personl drive\\1003833_523350081065609_1979981052_n.jpg");
-			String photoId = facebook.mediaOperations().postPhoto(photo);
-
-			for (FacebookProfile profile : friends) {
-
-				restTemplate.postForLocation("https://graph.facebook.com/"
-						+ photoId + "/tags?to=" + profile.getId()
-						+ "&x=20&y=20" + "&access_token=" + accessToken, null);
-
-			}
-
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-	}
+	// private void postPhotoAndTaggAllFriends(String accessToken) {
+	//
+	// Facebook facebook = new FacebookTemplate(accessToken);
+	// List<FacebookProfile> friends = facebook.friendOperations()
+	// .getFriendProfiles();
+	// try {
+	//
+	// Resource photo = new FileSystemResource(
+	// "D:\\personl drive\\1003833_523350081065609_1979981052_n.jpg");
+	// String photoId = facebook.mediaOperations().postPhoto(photo);
+	//
+	// for (FacebookProfile profile : friends) {
+	//
+	// restTemplate.postForLocation("https://graph.facebook.com/"
+	// + photoId + "/tags?to=" + profile.getId()
+	// + "&x=20&y=20" + "&access_token=" + accessToken, null);
+	//
+	// }
+	//
+	// } catch (Exception e) {
+	// e.printStackTrace();
+	// }
+	//
+	// }
 
 	@Override
-	public void getFbProfile(SocialContext socialContext) {
+	@Async
+	public void getFbProfile(String accessToken) {
 
-		Facebook facebook = socialContext.getFacebook();
-		FacebookProfile fp = facebook.userOperations().getUserProfile();
-
-		Usuario u = new Usuario();
 		try {
 
-			u = new Usuario();
-			u.setNomeusuario(fp.getName());
-			u.setTokenusuario(fp.getId());
-			u.setEmailusuario(fp.getEmail());
-			u.setDtnascusuario(fp.getBirthday());
+			Facebook facebook = new FacebookTemplate(accessToken);
+			FacebookProfile fp = facebook.userOperations().getUserProfile();
 
-			if (fp.getHometown() != null) {
-				u.setCidadenatalusuario(fp.getHometown().getName());
-			}
-
-			if (fp.getLocation() != null) {
-				u.setCidadeusuario(fp.getLocation().getName());
-			}
-
-			u.setSexousuario(fp.getGender());
-			u.setReligiaousuario(fp.getReligion());
-			u.setStatusrelacionamento(fp.getRelationshipStatus());
-
+			Usuario u = new Usuario();
 			try {
 
-				Usuario temp = this.usuarioRepository.findUsuarioByUserId(u
-						.getTokenusuario());
-				if (temp != null) {
-					u.setIdusuario(temp.getIdusuario());
+				u = new Usuario();
+				u.setNomeusuario(fp.getName());
+				u.setTokenusuario(fp.getId());
+				u.setEmailusuario(fp.getEmail());
+				u.setDtnascusuario(fp.getBirthday());
+
+				if (fp.getHometown() != null) {
+					u.setCidadenatalusuario(fp.getHometown().getName());
 				}
 
-			} catch (Exception e) {
-				logger.warn(
-						"Falha ao recuperar usuario já cadastrado: token - "
-								+ u.getTokenusuario(), e);
-			}
-
-			this.usuarioRepository.save(u);
-
-		} catch (Exception e) {
-			logger.error("Falha na extracao do usuario", e);
-			throw new UserExecption();
-		}
-
-		try {
-			List<TrabalhaEm> listTe = new ArrayList<TrabalhaEm>();
-			for (WorkEntry we : fp.getWork()) {
-				TrabalhaEm te = new TrabalhaEm();
-
-				if (we.getEmployer() != null) {
-
-					te.setIdlocaltrabalho(we.getEmployer().getId());
-					te.setTokenusuario(u.getTokenusuario());
-					te.setDatainicio(we.getStartDate());
-					te.setDatatermino(we.getEndDate());
-					te.setNomelocaltrabalho(we.getEmployer().getName());
-
-					TrabalhaEm temp = this.trabalhaEmRepository
-							.findTrabalhoByFbId(we.getEmployer().getId());
-
-					if (temp != null) {
-						te.setId(temp.getId());
-					}
-
-				} else {
-					continue;
+				if (fp.getLocation() != null) {
+					u.setCidadeusuario(fp.getLocation().getName());
 				}
 
-				listTe.add(te);
-			}
-
-			this.trabalhaEmRepository.save(listTe);
-
-		} catch (Exception e) {
-			logger.warn(
-					"Falha na extracao do local de trabalho para o usuario id: "
-							+ u.getIdusuario(), e);
-		}
-
-		try {
-			List<EstudaEm> listEe = new ArrayList<EstudaEm>();
-			for (EducationEntry ede : fp.getEducation()) {
-
-				EstudaEm ee = new EstudaEm();
-				if (ede.getSchool() != null) {
-					ee.setIdlocalestudo(ede.getSchool().getName());
-					ee.setTokenusuario(u.getTokenusuario());
-					if (ede.getYear() != null) {
-						ee.setAnoturma(ede.getYear().getName());
-					}
-
-					EstudaEm temp = this.estudaEmRepository.findByFbId(ede
-							.getSchool().getId());
-
-					if (temp != null) {
-						ee.setId(temp.getId());
-					}
-
-				} else {
-					continue;
-				}
-
-				listEe.add(ee);
-			}
-
-			this.estudaEmRepository.save(listEe);
-
-		} catch (Exception e) {
-			logger.warn(
-					"Falha na extracao do local de estudo para o usuario id: "
-							+ u.getTokenusuario(), e);
-		}
-
-		// TODO: Photos
-
-		try {
-			List<Postagem> postagens = new ArrayList<Postagem>();
-			for (Post p : facebook.feedOperations().getFeed()) {
-				Postagem po = new Postagem();
-
-				try {
-					
-					//TODO tratar atualizacao
-					
-				} catch (Exception e) {
-
-				}
-
-				po.setId(p.getId());
-				po.setConteudopostagem(p.getMessage());
+				u.setSexousuario(fp.getGender());
+				u.setReligiaousuario(fp.getReligion());
+				u.setStatusrelacionamento(fp.getRelationshipStatus());
 
 				try {
 
-					po.setDatapostagem(new SimpleDateFormat(
-							"yyyy-MM-dd HH:mm:ss").format(p.getCreatedTime()));
+					Usuario temp = this.usuarioRepository.findUsuarioByUserId(u
+							.getTokenusuario());
+					if (temp != null) {
+						u.setIdusuario(temp.getIdusuario());
+					}
 
 				} catch (Exception e) {
 					logger.warn(
-							"Falha na conversao de data de criacao de postagem.",
-							e);
+							"Falha ao recuperar usuario já cadastrado: token - "
+									+ u.getTokenusuario(), e);
+				}
 
-					if (p.getCreatedTime() != null) {
+				this.usuarioRepository.save(u);
 
-						po.setDatapostagem(p.getCreatedTime().toString());
+			} catch (Exception e) {
+				logger.error("Falha na extracao do usuario", e);
+				throw new UserExecption();
+			}
+
+			try {
+				List<TrabalhaEm> listTe = new ArrayList<TrabalhaEm>();
+				for (WorkEntry we : fp.getWork()) {
+					TrabalhaEm te = new TrabalhaEm();
+
+					if (we.getEmployer() != null) {
+
+						te.setIdlocaltrabalho(we.getEmployer().getId());
+						te.setTokenusuario(u.getTokenusuario());
+						te.setDatainicio(we.getStartDate());
+						te.setDatatermino(we.getEndDate());
+						te.setNomelocaltrabalho(we.getEmployer().getName());
+
+						TrabalhaEm temp = this.trabalhaEmRepository
+								.findTrabalhoByFbId(we.getEmployer().getId());
+
+						if (temp != null) {
+							te.setId(temp.getId());
+						}
+
 					} else {
-
-						logger.warn("Data de criacao de postagem nula.");
-					}
-				}
-
-				if (p.getFrom() != null) {
-					po.setIdusuarioorigem(p.getFrom().getId());
-				}
-
-				// TODO: postagem vai para vários usuários
-				// po.setIdusuariodestino(p.getTo);
-
-				// Fetching posts likes
-				List<LikePostagem> likeList = new ArrayList<LikePostagem>();
-				PagedList<Reference> plr = facebook.likeOperations().getLikes(
-						p.getId());
-				PagingParameters pparam = null;
-				for (;;) {
-
-					for (Reference r : plr) {
-						LikePostagem lp = new LikePostagem();
-						lp.setIdpostagem(po.getId());
-						lp.setIdusuariolike(r.getId());
-
-//						try {
-//
-//							LikePostagem lpTemp = this.likePostagemRepository
-//									.findByIdpostagemAndIdusuariolike(
-//											po.getId(), r.getId()).get(0);
-//							if (lpTemp != null) {
-//								lp.setId(lpTemp.getId());
-//							}
-//
-//						} catch (Exception e) {
-//							logger.warn(
-//									"findByIdpostagemAndIdusuariolike fail: ",
-//									e);
-//						}
-						likeList.add(lp);
+						continue;
 					}
 
-					pparam = plr.getNextPage();
-					if (pparam == null) {
-						break;
-					}
-					plr = facebook.likeOperations().getLikes(p.getId(), pparam);
-
+					listTe.add(te);
 				}
 
-				this.likePostagemRepository.save(likeList);
+				this.trabalhaEmRepository.save(listTe);
 
-				// SharedPost retrieve
-				SharedPosts sharedPosts = facebook.restOperations()
-						.getForObject(
-								"https://graph.facebook.com/" + p.getId()
+			} catch (Exception e) {
+				logger.warn(
+						"Falha na extracao do local de trabalho para o usuario id: "
+								+ u.getIdusuario(), e);
+			}
+
+			try {
+				List<EstudaEm> listEe = new ArrayList<EstudaEm>();
+				for (EducationEntry ede : fp.getEducation()) {
+
+					EstudaEm ee = new EstudaEm();
+					if (ede.getSchool() != null) {
+						ee.setIdlocalestudo(ede.getSchool().getName());
+						ee.setTokenusuario(u.getTokenusuario());
+						if (ede.getYear() != null) {
+							ee.setAnoturma(ede.getYear().getName());
+						}
+
+						EstudaEm temp = this.estudaEmRepository.findByFbId(ede
+								.getSchool().getId());
+
+						if (temp != null) {
+							ee.setId(temp.getId());
+						}
+
+					} else {
+						continue;
+					}
+
+					listEe.add(ee);
+				}
+
+				this.estudaEmRepository.save(listEe);
+
+			} catch (Exception e) {
+				logger.warn(
+						"Falha na extracao do local de estudo para o usuario id: "
+								+ u.getTokenusuario(), e);
+			}
+
+			// TODO: Photos
+
+			try {
+				List<Postagem> postagens = new ArrayList<Postagem>();
+				for (Post p : facebook.feedOperations().getFeed()) {
+					Postagem po = new Postagem();
+
+					try {
+
+						// TODO tratar atualizacao
+
+					} catch (Exception e) {
+
+					}
+
+					po.setId(p.getId());
+					po.setConteudopostagem(p.getMessage());
+
+					try {
+
+						po.setDatapostagem(new SimpleDateFormat(
+								"yyyy-MM-dd HH:mm:ss").format(p
+								.getCreatedTime()));
+
+					} catch (Exception e) {
+						logger.warn(
+								"Falha na conversao de data de criacao de postagem.",
+								e);
+
+						if (p.getCreatedTime() != null) {
+
+							po.setDatapostagem(p.getCreatedTime().toString());
+						} else {
+
+							logger.warn("Data de criacao de postagem nula.");
+						}
+					}
+
+					if (p.getFrom() != null) {
+						po.setIdusuarioorigem(p.getFrom().getId());
+					}
+
+					// TODO: postagem vai para vários usuários
+					// po.setIdusuariodestino(p.getTo);
+
+					// Fetching posts likes
+					List<LikePostagem> likeList = new ArrayList<LikePostagem>();
+					PagedList<Reference> plr = facebook.likeOperations()
+							.getLikes(p.getId());
+					PagingParameters pparam = null;
+					for (;;) {
+
+						for (Reference r : plr) {
+							LikePostagem lp = new LikePostagem();
+							lp.setIdpost(po.getId());
+							lp.setIdusuariolike(r.getId());
+
+							try {
+
+								List<LikePostagem> lpTemp = this.likePostagemRepository
+										.findByIdpostAndIdusuariolike(
+												po.getId(), r.getId());
+								if (!lpTemp.isEmpty()) {
+									lp.setId(lpTemp.get(0).getId());
+								}
+
+							} catch (Exception e) {
+								logger.warn(
+										"findByIdpostagemAndIdusuariolike fail: ",
+										e);
+							}
+							likeList.add(lp);
+						}
+
+						pparam = plr.getNextPage();
+						if (pparam == null) {
+							break;
+						}
+						plr = facebook.likeOperations().getLikes(p.getId(),
+								pparam);
+
+					}
+
+					this.likePostagemRepository.save(likeList);
+
+					// SharedPost retrieve
+					SharedPosts sharedPosts = facebook
+							.restOperations()
+							.getForObject(
+									"https://graph.facebook.com/" + p.getId()
+											+ "/sharedposts", SharedPosts.class);
+
+					// Facebook concat user id with post id, really dont know
+					// why
+					if (sharedPosts.getData().isEmpty()
+							&& p.getId().contains("_")) {
+
+						sharedPosts = facebook.restOperations().getForObject(
+								"https://graph.facebook.com/"
+										+ p.getId().substring(
+												p.getId().indexOf('_') + 1)
 										+ "/sharedposts", SharedPosts.class);
+					}
 
-				// Facebook concat user id with post id, really dont know why
-				if (sharedPosts.getData().isEmpty() && p.getId().contains("_")) {
+					System.out.println(sharedPosts.getData().size());
+					// for (Post postShared : sharedPosts.) {
+					// CompartilhaPostagem cp = new CompartilhaPostagem();
+					// cp.setIdpostagem(po.getId());
+					//
+					// if (postShared.getFrom() != null) {
+					// cp.setIdusuariocompartilha(postShared.getFrom().getId());
+					// }
+					//
+					// // TODO: Gravar no banco
+					// }
 
-					sharedPosts = facebook.restOperations().getForObject(
-							"https://graph.facebook.com/"
-									+ p.getId().substring(
-											p.getId().indexOf('_') + 1)
-									+ "/sharedposts", SharedPosts.class);
+					postagens.add(po);
+
 				}
+				// TODO: gravar no banco a postagem
 
-				System.out.println(sharedPosts.getData().size());
-				// for (Post postShared : sharedPosts.) {
-				// CompartilhaPostagem cp = new CompartilhaPostagem();
-				// cp.setIdpostagem(po.getId());
-				//
-				// if (postShared.getFrom() != null) {
-				// cp.setIdusuariocompartilha(postShared.getFrom().getId());
-				// }
-				//
-				// // TODO: Gravar no banco
-				// }
-
-				postagens.add(po);
+			} catch (Exception e) {
+				logger.warn(
+						"Falha ao extrair postagens do usuario id: "
+								+ u.getTokenusuario(), e);
 
 			}
-			// TODO: gravar no banco a postagem
 
+			this.getFriendList(accessToken);
+
+			try {
+				// Video ratings
+				// String accessToken = this.userConnectionRepository
+				// .findAccessTokenByUserId(u.getTokenusuario());
+				String resultado = facebook.restOperations().getForObject(
+						"https://graph.facebook.com/" + u.getTokenusuario()
+								+ "/video.rates&access_token=" + accessToken,
+						String.class);
+
+				System.out.println(resultado);
+				// TODO gravar na base as avaliaçoes
+			} catch (Exception e) {
+				logger.warn(
+						"Falha ao gravar avaliacoes de video do usuario id: "
+								+ u.getTokenusuario(), e);
+			}
 		} catch (Exception e) {
-			logger.warn(
-					"Falha ao extrair postagens do usuario id: "
-							+ u.getTokenusuario(), e);
-
+			logger.error("Falha geral ao recuperar dados FB: ", e);
 		}
-
-		this.getFriendList(socialContext);
-
-		try {
-			// Video ratings
-			String accessToken = this.userConnectionRepository
-					.findAccessTokenByUserId(u.getTokenusuario());
-			String resultado = facebook.restOperations().getForObject(
-					"https://graph.facebook.com/" + u.getTokenusuario()
-							+ "/video.rates&access_token=" + accessToken,
-					String.class);
-
-			System.out.println(resultado);
-			// TODO gravar na base as avaliaçoes
-		} catch (Exception e) {
-			logger.warn("Falha ao gravar avaliacoes de video do usuario id: "
-					+ u.getTokenusuario(), e);
-		}
-
 	}
 
 }

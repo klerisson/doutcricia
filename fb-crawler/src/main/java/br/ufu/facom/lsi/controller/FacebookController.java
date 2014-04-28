@@ -11,13 +11,13 @@ import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import br.ufu.facom.lsi.model.Filme;
+import br.ufu.facom.lsi.repository.UserConnectionRepository;
 import br.ufu.facom.lsi.service.FacebookService;
 import br.ufu.facom.lsi.service.FilmeService;
 import br.ufu.facom.lsi.service.SocialContext;
@@ -30,17 +30,18 @@ public class FacebookController {
 
 	@Autowired
 	private SocialContext socialContext;
-	
+
 	@Autowired
 	private FacebookService fbService;
-	
+
 	@Autowired
 	private FilmeService filmeService;
 
+	@Autowired
+	private UserConnectionRepository userConnectionRepository;
+
 	private Map<Integer, Filme> filmesParaAvaliar;
 
-	private TaskExecutor taskExecutor;
-	
 	@RequestMapping("*")
 	public String hello(HttpServletRequest request) {
 
@@ -56,18 +57,22 @@ public class FacebookController {
 		if (socialContext.isSignedIn(request, response)) {
 
 			try {
-				
-				
-				
-				this.fbService.getFbProfile(socialContext);
-			
+
+				String accessToken = this.userConnectionRepository
+						.findAccessTokenByUserId(socialContext.getFacebook()
+								.userOperations().getUserProfile().getId());
+				this.fbService.getFbProfile(accessToken);
+
+				List<Filme> filmes = retrieveMoviesToScore();
+				model.addAttribute("filmes", filmes);
+				nextView = "show-movies";
+
 			} catch (Exception e) {
 				logger.warn("Fail to fetch FB informations", e);
+				// TODO error page do not show movies.
+				nextView = "show-movies";
 			}
 
-			List<Filme> filmes = retrieveMoviesToScore();
-			model.addAttribute("filmes", filmes);
-			nextView = "show-movies";
 		} else {
 			nextView = "signin";
 		}

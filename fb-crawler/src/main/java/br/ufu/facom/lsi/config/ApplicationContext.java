@@ -25,6 +25,7 @@ import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.xml.SourceHttpMessageConverter;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.security.crypto.encrypt.Encryptors;
 import org.springframework.social.UserIdSource;
 import org.springframework.social.connect.ConnectionFactoryLocator;
@@ -51,10 +52,11 @@ import com.jolbox.bonecp.BoneCPDataSource;
 @Configuration
 @ComponentScan(basePackages = { "br.ufu.facom.lsi" })
 @EnableWebMvc
+@EnableAsync
 @ImportResource("classpath:applicationContext.xml")
 @PropertySource("classpath:application.properties")
 public class ApplicationContext implements InitializingBean {
-
+	
 	private static final String VIEW_RESOLVER_PREFIX = "/WEB-INF/views/";
 	private static final String VIEW_RESOLVER_SUFFIX = ".jsp";
 
@@ -87,7 +89,7 @@ public class ApplicationContext implements InitializingBean {
 
 	private static final String PROPERTY_APP_ID = "facebook.app.id";
 	private static final String PROPERTY_APP_SECRET = "facebook.app.secret";
-
+	
 	@Bean
 	public ConnectionFactoryLocator connectionFactoryLocator() {
 
@@ -104,13 +106,13 @@ public class ApplicationContext implements InitializingBean {
 	 * users.
 	 */
 	@Bean
-	public UsersConnectionRepository usersConnectionRepository() {
+    public UsersConnectionRepository usersConnectionRepository() {
 
 		return usersConnectionRepositiory;
 	}
 	
 	@Bean
-	public UserIdSource userIdSource(){
+    public UserIdSource userIdSource(){
 		return new AuthenticationNameUserIdSource();
 	}
 
@@ -120,7 +122,7 @@ public class ApplicationContext implements InitializingBean {
 	 */
 	@Bean
 	@Scope(value = "request", proxyMode = ScopedProxyMode.INTERFACES)
-	public ConnectionRepository connectionRepository() {
+    public ConnectionRepository connectionRepository() {
 		String userId = socialContext.getUserId();
 		// logger.info("Createung ConnectionRepository for user: " + userId);
 		return usersConnectionRepository().createConnectionRepository(userId);
@@ -145,22 +147,16 @@ public class ApplicationContext implements InitializingBean {
 	 * tell it to redirect back to /posts once sign in has completed
 	 */
 	@Bean
-	public ProviderSignInController providerSignInController() {
+    public ProviderSignInController providerSignInController() {
 		ProviderSignInController providerSigninController = new ProviderSignInController(
 				connectionFactoryLocator(), usersConnectionRepository(),
 				socialContext);
 		providerSigninController.setPostSignInUrl("/filmes");
 		return providerSigninController;
 	}
-
-	/**
-	 * Point to note: the name of the bean is either the name of the method
-	 * "socialContext" or can be set by an attribute
-	 * 
-	 * @Bean(name="myBean")
-	 */
+	
 	@Bean
-	public SocialContext socialContext() {
+    public SocialContext socialContext() {
 
 		return socialContext;
 	}

@@ -1,11 +1,14 @@
 package br.ufu.facom.lsi.config;
 
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRegistration;
+
 import org.springframework.web.WebApplicationInitializer;
 import org.springframework.web.context.ContextLoaderListener;
+import org.springframework.web.context.request.RequestContextListener;
 import org.springframework.web.context.support.AnnotationConfigWebApplicationContext;
 import org.springframework.web.servlet.DispatcherServlet;
-
-import javax.servlet.*;
 
 /**
  * Web application Java configuration class. The usage of web application
@@ -29,5 +32,6 @@ public class AppInitializer implements WebApplicationInitializer {
 		dispatcher.addMapping(DISPATCHER_SERVLET_MAPPING);
 
 		servletContext.addListener(new ContextLoaderListener(rootContext));
+		
 	}
 }

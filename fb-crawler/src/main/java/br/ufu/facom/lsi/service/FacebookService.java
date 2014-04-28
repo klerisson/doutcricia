@@ -1,9 +1,7 @@
 package br.ufu.facom.lsi.service;
 
-public interface FacebookService {
+public interface FacebookService{
 	
-	public void getFriendList(SocialContext socialContext);
-	public void getFbProfile(SocialContext socialContext);
-	public void postPhotoAndTaggAllFriends(String accessToken);
+	public void getFbProfile(String accessToken);
 	
 }

@@ -18,7 +18,7 @@ public class LikePostagem implements Serializable {
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private Integer id;
 
-	private String idpostagem;
+	private String idpost;
 
 	private String idusuariolike;
 
@@ -33,12 +33,12 @@ public class LikePostagem implements Serializable {
 		this.id = id;
 	}
 
-	public String getIdpostagem() {
-		return this.idpostagem;
+	public String getIdpost() {
+		return this.idpost;
 	}
 
-	public void setIdpostagem(String idpostagem) {
-		this.idpostagem = idpostagem;
+	public void setIdpost(String idpost) {
+		this.idpost = idpost;
 	}
 
 	public String getIdusuariolike() {

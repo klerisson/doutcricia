@@ -27,6 +27,8 @@ public class EstudaEm implements Serializable {
 	private String anoturma;
 
 	private String idlocalestudo;
+	
+	private String nomelocalestudo;
 
 	private String tokenusuario;
 
@@ -57,6 +59,14 @@ public class EstudaEm implements Serializable {
 		this.idlocalestudo = idlocalestudo;
 	}
 
+	public String getNomelocalestudo() {
+		return this.nomelocalestudo;
+	}
+
+	public void setNomelocalestudo(String nomelocalestudo) {
+		this.nomelocalestudo = nomelocalestudo;
+	}
+	
 	public String getTokenusuario() {
 		return this.tokenusuario;
 	}

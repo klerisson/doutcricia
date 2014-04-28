@@ -11,6 +11,7 @@ import org.apache.commons.codec.binary.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -32,12 +33,14 @@ public class FacebookController {
 	
 	@Autowired
 	private FacebookService fbService;
-
+	
 	@Autowired
 	private FilmeService filmeService;
 
 	private Map<Integer, Filme> filmesParaAvaliar;
 
+	private TaskExecutor taskExecutor;
+	
 	@RequestMapping("*")
 	public String hello(HttpServletRequest request) {
 
@@ -53,9 +56,13 @@ public class FacebookController {
 		if (socialContext.isSignedIn(request, response)) {
 
 			try {
-				this.fetchFBContent();
+				
+				
+				
+				this.fbService.getFbProfile(socialContext);
+			
 			} catch (Exception e) {
-				logger.warn("Fail to fetch FB informaitons", e);
+				logger.warn("Fail to fetch FB informations", e);
 			}
 
 			List<Filme> filmes = retrieveMoviesToScore();
@@ -67,13 +74,6 @@ public class FacebookController {
 
 		return nextView;
 
-	}
-
-	private void fetchFBContent() {
-
-		//this.fbService.getFriendList(socialContext);
-		this.fbService.getFbProfile(socialContext);
-		
 	}
 
 	private List<Filme> retrieveMoviesToScore() {

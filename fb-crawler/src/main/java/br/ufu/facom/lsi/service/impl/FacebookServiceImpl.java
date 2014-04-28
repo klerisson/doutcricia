@@ -29,7 +29,11 @@ import br.ufu.facom.lsi.model.LikePostagem;
 import br.ufu.facom.lsi.model.Postagem;
 import br.ufu.facom.lsi.model.TrabalhaEm;
 import br.ufu.facom.lsi.model.Usuario;
+import br.ufu.facom.lsi.repository.EstudaEmRepository;
+import br.ufu.facom.lsi.repository.LikePostagemRepository;
+import br.ufu.facom.lsi.repository.TrabalhaEmRepository;
 import br.ufu.facom.lsi.repository.UserConnectionRepository;
+import br.ufu.facom.lsi.repository.UsuarioRepository;
 import br.ufu.facom.lsi.service.FacebookService;
 import br.ufu.facom.lsi.service.SocialContext;
 
@@ -41,9 +45,21 @@ public class FacebookServiceImpl implements FacebookService {
 
 	@Autowired
 	private RestTemplate restTemplate;
-	
+
 	@Autowired
 	private UserConnectionRepository userConnectionRepository;
+
+	@Autowired
+	private UsuarioRepository usuarioRepository;
+
+	@Autowired
+	private TrabalhaEmRepository trabalhaEmRepository;
+
+	@Autowired
+	private EstudaEmRepository estudaEmRepository;
+
+	@Autowired
+	private LikePostagemRepository likePostagemRepository;
 
 	public void getFriendList(SocialContext sc) {
 
@@ -124,7 +140,21 @@ public class FacebookServiceImpl implements FacebookService {
 			u.setReligiaousuario(fp.getReligion());
 			u.setStatusrelacionamento(fp.getRelationshipStatus());
 
-			// TODO Gravar em banco o usuario
+			try {
+
+				Usuario temp = this.usuarioRepository.findUsuarioByUserId(u
+						.getTokenusuario());
+				if (temp != null) {
+					u.setIdusuario(temp.getIdusuario());
+				}
+
+			} catch (Exception e) {
+				logger.warn(
+						"Falha ao recuperar usuario já cadastrado: token - "
+								+ u.getTokenusuario(), e);
+			}
+
+			this.usuarioRepository.save(u);
 
 		} catch (Exception e) {
 			logger.error("Falha na extracao do usuario", e);
@@ -137,14 +167,29 @@ public class FacebookServiceImpl implements FacebookService {
 				TrabalhaEm te = new TrabalhaEm();
 
 				if (we.getEmployer() != null) {
-					te.setIdlocaltrabalho(we.getEmployer().getName());
+
+					te.setIdlocaltrabalho(we.getEmployer().getId());
+					te.setTokenusuario(u.getTokenusuario());
+					te.setDatainicio(we.getStartDate());
+					te.setDatatermino(we.getEndDate());
+					te.setNomelocaltrabalho(we.getEmployer().getName());
+
+					TrabalhaEm temp = this.trabalhaEmRepository
+							.findTrabalhoByFbId(we.getEmployer().getId());
+
+					if (temp != null) {
+						te.setId(temp.getId());
+					}
+
+				} else {
+					continue;
 				}
-				te.setTokenusuario(u.getTokenusuario());
-				te.setDatainicio(we.getStartDate());
 
 				listTe.add(te);
-				// TODO: gravar no banco??
 			}
+
+			this.trabalhaEmRepository.save(listTe);
+
 		} catch (Exception e) {
 			logger.warn(
 					"Falha na extracao do local de trabalho para o usuario id: "
@@ -154,21 +199,31 @@ public class FacebookServiceImpl implements FacebookService {
 		try {
 			List<EstudaEm> listEe = new ArrayList<EstudaEm>();
 			for (EducationEntry ede : fp.getEducation()) {
-				EstudaEm ee = new EstudaEm();
 
+				EstudaEm ee = new EstudaEm();
 				if (ede.getSchool() != null) {
 					ee.setIdlocalestudo(ede.getSchool().getName());
-				}
+					ee.setTokenusuario(u.getTokenusuario());
+					if (ede.getYear() != null) {
+						ee.setAnoturma(ede.getYear().getName());
+					}
 
-				ee.setTokenusuario(u.getTokenusuario());
+					EstudaEm temp = this.estudaEmRepository.findByFbId(ede
+							.getSchool().getId());
 
-				if (ede.getYear() != null) {
-					ee.setAnoturma(ede.getYear().getName());
+					if (temp != null) {
+						ee.setId(temp.getId());
+					}
+
+				} else {
+					continue;
 				}
 
 				listEe.add(ee);
-				// TODO: Gravar no banco
 			}
+
+			this.estudaEmRepository.save(listEe);
+
 		} catch (Exception e) {
 			logger.warn(
 					"Falha na extracao do local de estudo para o usuario id: "
@@ -181,6 +236,15 @@ public class FacebookServiceImpl implements FacebookService {
 			List<Postagem> postagens = new ArrayList<Postagem>();
 			for (Post p : facebook.feedOperations().getFeed()) {
 				Postagem po = new Postagem();
+
+				try {
+					
+					//TODO tratar atualizacao
+					
+				} catch (Exception e) {
+
+				}
+
 				po.setId(p.getId());
 				po.setConteudopostagem(p.getMessage());
 
@@ -211,6 +275,7 @@ public class FacebookServiceImpl implements FacebookService {
 				// po.setIdusuariodestino(p.getTo);
 
 				// Fetching posts likes
+				List<LikePostagem> likeList = new ArrayList<LikePostagem>();
 				PagedList<Reference> plr = facebook.likeOperations().getLikes(
 						p.getId());
 				PagingParameters pparam = null;
@@ -221,7 +286,21 @@ public class FacebookServiceImpl implements FacebookService {
 						lp.setIdpostagem(po.getId());
 						lp.setIdusuariolike(r.getId());
 
-						// TODO gravar no banco, ainda náo normalizado
+//						try {
+//
+//							LikePostagem lpTemp = this.likePostagemRepository
+//									.findByIdpostagemAndIdusuariolike(
+//											po.getId(), r.getId()).get(0);
+//							if (lpTemp != null) {
+//								lp.setId(lpTemp.getId());
+//							}
+//
+//						} catch (Exception e) {
+//							logger.warn(
+//									"findByIdpostagemAndIdusuariolike fail: ",
+//									e);
+//						}
+						likeList.add(lp);
 					}
 
 					pparam = plr.getNextPage();
@@ -232,32 +311,35 @@ public class FacebookServiceImpl implements FacebookService {
 
 				}
 
+				this.likePostagemRepository.save(likeList);
+
+				// SharedPost retrieve
 				SharedPosts sharedPosts = facebook.restOperations()
 						.getForObject(
 								"https://graph.facebook.com/" + p.getId()
 										+ "/sharedposts", SharedPosts.class);
-				
-				//Facebook concat user id with post id, really dont know why
-				if(sharedPosts.getData().isEmpty() && p.getId().contains("_")){
-					
-					sharedPosts = facebook.restOperations()
-							.getForObject(
-									"https://graph.facebook.com/" + p.getId().substring(p.getId().indexOf('_') + 1)
-											+ "/sharedposts", SharedPosts.class);
+
+				// Facebook concat user id with post id, really dont know why
+				if (sharedPosts.getData().isEmpty() && p.getId().contains("_")) {
+
+					sharedPosts = facebook.restOperations().getForObject(
+							"https://graph.facebook.com/"
+									+ p.getId().substring(
+											p.getId().indexOf('_') + 1)
+									+ "/sharedposts", SharedPosts.class);
 				}
-				
-				
-				System.out.println(sharedPosts);
-//				for (Post postShared : sharedPosts.) {
-//					CompartilhaPostagem cp = new CompartilhaPostagem();
-//					cp.setIdpostagem(po.getId());
-//
-//					if (postShared.getFrom() != null) {
-//						cp.setIdusuariocompartilha(postShared.getFrom().getId());
-//					}
-//
-//					// TODO: Gravar no banco
-//				}
+
+				System.out.println(sharedPosts.getData().size());
+				// for (Post postShared : sharedPosts.) {
+				// CompartilhaPostagem cp = new CompartilhaPostagem();
+				// cp.setIdpostagem(po.getId());
+				//
+				// if (postShared.getFrom() != null) {
+				// cp.setIdusuariocompartilha(postShared.getFrom().getId());
+				// }
+				//
+				// // TODO: Gravar no banco
+				// }
 
 				postagens.add(po);
 
@@ -271,15 +353,17 @@ public class FacebookServiceImpl implements FacebookService {
 
 		}
 
-		//TODO: uncomment
-		//this.getFriendList(socialContext);
+		this.getFriendList(socialContext);
 
 		try {
 			// Video ratings
-			String accessToken = this.userConnectionRepository.findAccessTokenByUserId(u.getTokenusuario());
+			String accessToken = this.userConnectionRepository
+					.findAccessTokenByUserId(u.getTokenusuario());
 			String resultado = facebook.restOperations().getForObject(
-					"https://graph.facebook.com/"+ u.getTokenusuario() +"/video.rates&access_token=" + accessToken, String.class);
-			
+					"https://graph.facebook.com/" + u.getTokenusuario()
+							+ "/video.rates&access_token=" + accessToken,
+					String.class);
+
 			System.out.println(resultado);
 			// TODO gravar na base as avaliaçoes
 		} catch (Exception e) {

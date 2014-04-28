@@ -29,6 +29,8 @@ public class TrabalhaEm implements Serializable {
 	private String datatermino;
 
 	private String idlocaltrabalho;
+	
+	private String nomelocaltrabalho;
 
 	private String tokenusuario;
 
@@ -63,10 +65,18 @@ public class TrabalhaEm implements Serializable {
 		return this.idlocaltrabalho;
 	}
 
-	public void setIdlocaltrabalho(String idlocaltrabalho) {
-		this.idlocaltrabalho = idlocaltrabalho;
+	public void setIdlocaltrabalho(String nomelocaltrabalho) {
+		this.idlocaltrabalho = nomelocaltrabalho;
 	}
 
+	public String getNomelocaltrabalho() {
+		return this.nomelocaltrabalho;
+	}
+
+	public void setNomelocaltrabalho(String nomelocaltrabalho) {
+		this.nomelocaltrabalho = nomelocaltrabalho;
+	}
+	
 	public String getTokenusuario() {
 		return this.tokenusuario;
 	}

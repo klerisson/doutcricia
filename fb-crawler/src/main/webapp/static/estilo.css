@@ -1,0 +1,106 @@
+body {
+	padding-top: 40px;
+}
+
+#nav ul li {
+	float: left;
+	margin-right: 30px;
+	line-height: 40px;
+}
+
+#theText {
+	margin-top: 60px;
+}
+
+#bigphoto img {
+	max-width: 100%;
+	height: auto;
+	-webkit-border-radius: 200px;
+	-moz-border-radius: 200px;
+	border-radius: 200px;
+}
+
+/* iPad Portrait/Browser */
+@media only screen and (min-width: 768px) and (max-width: 991px) {
+	#theText {
+		margin-top: 20px;
+	}
+}
+
+/* Mobile/Browser */
+@media only screen and (max-width: 767px) {
+	#theText {
+		margin-top: 10px;
+	}
+}
+
+#logo_lsi {
+	background-image: url('lsi.png');
+	background-repeat: no-repeat;
+	margin: 15px 0px 0px 10px;
+	width: 271px;
+	height: 60px;
+	float: left;
+	/* border-style: dotted; */
+	/* border-color: green; */
+}
+
+.logo_ufu {
+	background-image: url('ufu-logo.png');
+	background-repeat: no-repeat;
+	height: 50px;
+	width: 149px;
+	margin: 13px 10px 0px 0px;
+	float: left;
+	/* border-style: dotted; */
+	/* border-color: green; */
+	/* font-size: smaller; */
+	/* font-family: Arial; */
+	/* font-weight: bold; */
+	/* text-align: center; */
+	/* color: white; */
+}
+
+#cover {
+	background-size: cover;
+	-moz-background-size: cover;
+}
+
+#corpo {
+	width: 968px;
+	clear: both;
+	position: relative;
+	top: 10px;
+	background-color: #FFF;
+	/* margin-top: 60px; */
+	/* border-style: dashed; */
+	/* border-color: pink; */
+}
+
+#rodape {
+	font-size: 11px;
+	text-align: right;
+	width: 963px;
+	/* clear:both; */
+	margin-top: 20px;
+	/* border-style: dashed; */
+}
+
+#rodape a:link {
+	color: #666666;
+	text-decoration: none;
+}
+
+#rodape a:visited {
+	color: #999999;
+	text-decoration: none;
+}
+
+#rodape a:hover {
+	color: #800000;
+	text-decoration: none;
+}
+
+#rodape a:active {
+	color: #FF0000;
+}

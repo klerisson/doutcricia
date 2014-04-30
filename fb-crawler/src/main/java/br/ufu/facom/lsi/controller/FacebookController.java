@@ -1,8 +1,7 @@
 package br.ufu.facom.lsi.controller;
 
-import java.util.HashMap;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -13,14 +12,22 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 
+import br.ufu.facom.lsi.dto.AvaliacaoDTO;
+import br.ufu.facom.lsi.dto.JsonResponse;
+import br.ufu.facom.lsi.exception.UserNotFoundException;
 import br.ufu.facom.lsi.model.Filme;
+import br.ufu.facom.lsi.model.Usuario;
 import br.ufu.facom.lsi.repository.UserConnectionRepository;
 import br.ufu.facom.lsi.service.FacebookService;
 import br.ufu.facom.lsi.service.FilmeService;
+import br.ufu.facom.lsi.service.MovieRatingService;
 import br.ufu.facom.lsi.service.SocialContext;
+import br.ufu.facom.lsi.service.UsuarioService;
 
 @Controller
 public class FacebookController {
@@ -38,9 +45,15 @@ public class FacebookController {
 	private FilmeService filmeService;
 
 	@Autowired
+	private UsuarioService usuarioService;
+
+	@Autowired
+	private MovieRatingService movieService;
+
+	@Autowired
 	private UserConnectionRepository userConnectionRepository;
 
-	private Map<Integer, Filme> filmesParaAvaliar;
+	private List<Filme> filmesParaAvaliar;
 
 	@RequestMapping("*")
 	public String hello(HttpServletRequest request) {
@@ -58,10 +71,10 @@ public class FacebookController {
 
 			try {
 
-				String accessToken = this.userConnectionRepository
-						.findAccessTokenByUserId(socialContext.getFacebook()
-								.userOperations().getUserProfile().getId());
-				this.fbService.getFbProfile(accessToken);
+				String accessToken = this.fetchAccessToken();
+
+				Usuario u = this.fbService.saveUsuario(accessToken);
+				this.fbService.getFbProfile(u, accessToken);
 
 				List<Filme> filmes = retrieveMoviesToScore();
 				model.addAttribute("filmes", filmes);
@@ -81,18 +94,69 @@ public class FacebookController {
 
 	}
 
-	private List<Filme> retrieveMoviesToScore() {
+	private String fetchAccessToken() throws UserNotFoundException {
 
-		List<Filme> filmes = filmeService.fetchMoviesToScore();
-		logger.info("Retrieved " + filmes.size() + " movies");
+		String accessToken = this.userConnectionRepository
+				.findAccessTokenByUserId(this.socialContext.getFacebook()
+						.userOperations().getUserProfile().getId());
+		return accessToken;
 
-		this.filmesParaAvaliar = new HashMap<Integer, Filme>();
-		for (Filme f : filmes) {
-			f.setImgfilmeString(new String(Base64.encodeBase64(f.getImgfilme())));
-			this.filmesParaAvaliar.put(f.getIdfilme(), f);
-		}
-
-		return filmes;
 	}
 
+	private List<Filme> retrieveMoviesToScore() {
+
+		if (this.filmesParaAvaliar != null && this.filmesParaAvaliar.size() > 0) {
+			return this.filmesParaAvaliar;
+		} else {
+
+			List<Filme> filmes = filmeService.fetchMoviesToScore();
+			logger.info("Retrieved " + filmes.size() + " movies");
+
+			this.filmesParaAvaliar = new ArrayList<Filme>();
+			for (Filme f : filmes) {
+				
+				if(f.getTitulofilme().length() > 15){
+					f.setTitulofilme(f.getTitulofilme().substring(0, 13).concat("..."));
+				}
+				
+				f.setImgfilmeString(new String(Base64.encodeBase64(f
+						.getImgfilme())));
+
+				this.filmesParaAvaliar.add(f);
+			}
+
+			return filmes;
+		}
+	}
+
+	@RequestMapping(headers = { "Accept=application/json" }, value = "rate", method = RequestMethod.POST)
+	@ResponseBody
+	public JsonResponse rate(@RequestBody AvaliacaoDTO avaliacao,
+			HttpServletRequest request, HttpServletResponse response) {
+
+		try {
+
+			if (socialContext.isSignedIn(request, response)) {
+
+				Usuario u = this.usuarioService.findByUserId(socialContext
+						.getFacebook().userOperations().getUserProfile()
+						.getId());
+
+				avaliacao.setIdusuario(u.getIdusuario());
+
+				this.movieService.rateMovie(avaliacao);
+
+				return new JsonResponse("OK", "");
+
+			} else {
+				throw new RuntimeException();
+			}
+
+		} catch (Exception e) {
+			logger.error("Falha ao avaliar filme.", e);
+			return new JsonResponse("Fail",
+					"Desculpe, mas ocorreu uma falha ao avaliar filme. Por favor tente mais tarde.");
+		}
+
+	}
 }

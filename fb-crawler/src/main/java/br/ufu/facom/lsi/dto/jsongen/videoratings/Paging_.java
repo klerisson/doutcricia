@@ -10,6 +10,9 @@ public class Paging_ {
     @Expose
     private String next;
 
+    @Expose
+    private String previous;
+    
     public String getNext() {
         return next;
     }
@@ -17,5 +20,13 @@ public class Paging_ {
     public void setNext(String next) {
         this.next = next;
     }
+
+	public String getPrevious() {
+		return previous;
+	}
+
+	public void setPrevious(String previous) {
+		this.previous = previous;
+	}
 
 }

@@ -85,7 +85,7 @@ public class ApplicationContext implements InitializingBean {
 	private DataSource dataSource;
 
 	private UsersConnectionRepository usersConnectionRepositiory;
-	private UserIdSource userIdSource;
+	//private UserIdSource userIdSource;
 
 	private static final String PROPERTY_APP_ID = "facebook.app.id";
 	private static final String PROPERTY_APP_SECRET = "facebook.app.secret";

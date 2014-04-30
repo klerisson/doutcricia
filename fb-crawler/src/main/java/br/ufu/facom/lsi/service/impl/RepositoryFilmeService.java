@@ -10,7 +10,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import br.ufu.facom.lsi.dto.FilmeDTO;
-import br.ufu.facom.lsi.exception.FilmeNotFoundException;
 import br.ufu.facom.lsi.model.Filme;
 import br.ufu.facom.lsi.repository.FilmeRepository;
 import br.ufu.facom.lsi.service.FilmeService;
@@ -46,17 +45,12 @@ public class RepositoryFilmeService implements FilmeService {
 
 	@Transactional(readOnly = true)
 	@Override
-	public Filme findById(Long id) {
+	public Filme findById(Integer id) {
 		LOGGER.debug("Finding movie by id: " + id);
 		return filmeRepository.findOne(id);
 		
 	}
 
-	@Override
-	public Filme update(FilmeDTO updated) throws FilmeNotFoundException {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 	@Transactional(readOnly = true)
 	@Override

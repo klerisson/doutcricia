@@ -5,6 +5,6 @@ import br.ufu.facom.lsi.exception.UserNotFoundException;
 
 public interface UserConnectionService {
 	
-	public String getAccessToken(String userId) throws UserNotFoundException;
+	//public String getAccessToken(String userId) throws UserNotFoundException;
 	
 }

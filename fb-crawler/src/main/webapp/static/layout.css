@@ -66,6 +66,42 @@ body {
 	border: 1px dotted #333;
 	background-color: #E9E9E9;
 }
+
+
+#rodape {
+	font-size: 11px;
+	text-align: right;
+	width: 963px;
+	/* clear:both; */
+	margin-top: 20px;
+	/* border-style: dashed; */
+}
+
+#rodape a:link {
+	color: #666666;
+	text-decoration: none;
+}
+
+#rodape a:visited {
+	color: #999999;
+	text-decoration: none;
+}
+
+#rodape a:hover {
+	color: #800000;
+	text-decoration: none;
+}
+
+#rodape a:active {
+	color: #FF0000;
+}
+
+#logo_ufu a img {
+	width: 149px;
+	float: left;
+}
+
+
 /* #Media Queries
 ================================================== */
 	

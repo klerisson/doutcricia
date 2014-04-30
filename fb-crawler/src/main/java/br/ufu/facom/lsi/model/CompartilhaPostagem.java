@@ -22,6 +22,8 @@ public class CompartilhaPostagem implements Serializable {
 
 	private String idusuariocompartilha;
 
+	private String idusuario;
+	
 	public CompartilhaPostagem() {
 	}
 
@@ -47,6 +49,14 @@ public class CompartilhaPostagem implements Serializable {
 
 	public void setIdusuariocompartilha(String idusuariocompartilha) {
 		this.idusuariocompartilha = idusuariocompartilha;
+	}
+
+	public String getIdusuario() {
+		return idusuario;
+	}
+
+	public void setIdusuario(String idusuario) {
+		this.idusuario = idusuario;
 	}
 
 }

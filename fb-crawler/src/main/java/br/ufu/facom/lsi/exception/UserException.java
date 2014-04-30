@@ -1,6 +1,6 @@
 package br.ufu.facom.lsi.exception;
 
-public class UserExecption extends RuntimeException {
+public class UserException extends RuntimeException {
 
 	/**
 	 * 

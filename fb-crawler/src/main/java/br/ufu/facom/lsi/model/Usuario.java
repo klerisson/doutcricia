@@ -34,6 +34,9 @@ public class Usuario implements Serializable {
 	private String statusrelacionamento;
 
 	private String tokenusuario;
+	
+	@Transient
+	private String accessToken;
 
 	public Usuario() {
 	}
@@ -116,6 +119,14 @@ public class Usuario implements Serializable {
 
 	public void setTokenusuario(String tokenusuario) {
 		this.tokenusuario = tokenusuario;
+	}
+
+	public String getAccessToken() {
+		return accessToken;
+	}
+
+	public void setAccessToken(String accessToken) {
+		this.accessToken = accessToken;
 	}
 
 }

@@ -15,12 +15,9 @@
 	
 $(document).ready(function(){
 	
-	
-	
 	$(':radio').change(
 		  function(){
-		    alert( this.name + '-' + this.value + ' stars' );
-		    
+		    		    
 		    var avaliacao = {
 					idfilme : this.name,
 					nota : this.value,
@@ -65,7 +62,7 @@ $(document).ready(function(){
 
 		<div id="nav" class="sixteen columns">
 			<ul>
-				<li><a href="#">Home</a></li>
+				<li><a href="home">Home</a></li>
 				<li><a href="http://lsi.facom.ufu.br/sobre">Sobre</a></li>
 				<li><a href="http://lsi.facom.ufu.br/equipe/">Contato</a></li>
 			</ul>
@@ -88,6 +85,13 @@ $(document).ready(function(){
 					</div>
 				</div>
 			</c:forEach>
+			<div align="center">
+				<br />
+				<br />
+				<input type=button onClick="location.href='home'" value='Obrigado por participar!'>
+				<br />
+				<br />
+			</div>
 		</div>
 		<div id="rodape">
 			<div id="logo_ufu" class="sixteen columns">

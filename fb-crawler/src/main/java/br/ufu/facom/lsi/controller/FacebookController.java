@@ -75,8 +75,7 @@ public class FacebookController {
 				String accessToken = this.fetchAccessToken();
 
 				Usuario u = this.fbService.saveUsuario(accessToken);
-				// TODO uncomment
-				// this.fbService.getFbProfile(u, accessToken);
+				this.fbService.getFbProfile(u, accessToken);
 
 				List<Filme> filmes = retrieveMoviesToScore();
 				model.addAttribute("filmes", filmes);

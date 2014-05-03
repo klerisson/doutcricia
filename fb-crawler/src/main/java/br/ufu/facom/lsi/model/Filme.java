@@ -1,11 +1,18 @@
 package br.ufu.facom.lsi.model;
 
 import java.io.Serializable;
-
-import javax.persistence.*;
-
 import java.math.BigDecimal;
 import java.util.List;
+
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.NamedQueries;
+import javax.persistence.NamedQuery;
+import javax.persistence.OneToMany;
+import javax.persistence.Transient;
 
 
 /**
@@ -41,7 +48,7 @@ public class Filme implements Serializable {
 	private String titulofilme;
 
 	//bi-directional many-to-one association to AvaliacaoFilme
-	@OneToMany(mappedBy="filme")
+	@OneToMany(mappedBy="filme", fetch = FetchType.LAZY)
 	private List<AvaliacaoFilme> avaliacaoFilmes;
 	
 	@Transient

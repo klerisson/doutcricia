@@ -5,37 +5,53 @@
 <head>
 <title>Home</title>
 
-<script src="<c:url value="/static/jquery-1.10.1.min.js" />"></script>
+<script src="<c:url value="/static/jquery-1.9.1.min.js" />"></script>
+<link href="<c:url value="/static/rating.css" />" rel="stylesheet">
 <link href="<c:url value="/static/base.css" />" rel="stylesheet">
 <link href="<c:url value="/static/skeleton.css" />" rel="stylesheet">
 <link href="<c:url value="/static/layout.css" />" rel="stylesheet">
-<link href="<c:url value="/static/stars.css" />" rel="stylesheet">
+
 <script type="text/javascript">
-	function rateMovie(id, rating) {
+	
+$(document).ready(function(){
+	
+	
+	
+	$(':radio').change(
+		  function(){
+		    alert( this.name + '-' + this.value + ' stars' );
+		    
+		    var avaliacao = {
+					idfilme : this.name,
+					nota : this.value,
+					idusuario : null,
+			};
+		    
+		    $.ajax({
+				url : "/fb-crawler/rate",
+				type : 'POST',
+				dataType : 'json',
+				data : JSON.stringify(avaliacao),
+				contentType : 'application/json',
+				mimeType : 'application/json',
+				async : false,
+				cache : false,
+				processData : false,
+				success : function(data) {
+					if (data.status == 'OK')
+						;
+					else
+						alert(data.errorMessage);
+				}
+			});
+		  
+		  }		  
+	);
+});
+	
 
-		var avaliacao = {
-			idfilme : id,
-			nota : rating,
-			idusuario : null,
-		};
-
-		$.ajax({
-			url : "/fb-crawler/rate",
-			type : 'POST',
-			dataType : 'json',
-			data : JSON.stringify(avaliacao),
-			contentType : 'application/json',
-			mimeType : 'application/json',
-			async: false,    
-            cache: false,          
-            processData:false,
-            success: function(data) {
-                if(data.status == 'OK') ;
-                else alert(data.errorMessage);
-            }
-		});
-
-	}
+	
+	
 </script>
 </head>
 <body>
@@ -56,45 +72,18 @@
 		</div>
 
 		<div id="theText" class="sixteen columns">
-			<c:forEach items="${filmes}" var="filme">
+			<c:forEach items="${filmes}" var="filme" varStatus="myIndex">
 				<div class="filmeItem">
 					<img
 						src="data:image/jpeg;base64,<c:out value="${filme.imgfilmeString}"/>"
 						alt="<c:out value="${filme.titulofilme}" />"
 						title="<c:out value="${filme.titulofilme}" />" /><br />
 					<div>
-						<span><c:out value="${filme.titulofilme}" /></span><br />
-						<span class="rating"> <input type="radio"
-							class="rating-input"
-							id="rating-input-<c:out value="${filme.idfilme}"/>-5"
-							name="rating-input-<c:out value="${filme.idfilme}"/>"
-							onclick="rateMovie('<c:out value="${filme.idfilme}" />', '5');" />
-							<label for="rating-input-<c:out value="${filme.idfilme}"/>-5"
-							class="rating-star"></label> <input type="radio"
-							class="rating-input"
-							id="rating-input-<c:out value="${filme.idfilme}"/>-4"
-							name="rating-input-<c:out value="${filme.idfilme}"/>"
-							onclick="rateMovie('<c:out value="${filme.idfilme}" />', '4');" />
-							<label for="rating-input-<c:out value="${filme.idfilme}"/>-4"
-							class="rating-star"></label> <input type="radio"
-							class="rating-input"
-							id="rating-input-<c:out value="${filme.idfilme}"/>-3"
-							name="rating-input-<c:out value="${filme.idfilme}"/>"
-							onclick="rateMovie('<c:out value="${filme.idfilme}" />', '3');" />
-							<label for="rating-input-<c:out value="${filme.idfilme}"/>-3"
-							class="rating-star"></label> <input type="radio"
-							class="rating-input"
-							id="rating-input-<c:out value="${filme.idfilme}"/>-2"
-							name="rating-input-<c:out value="${filme.idfilme}"/>"
-							onclick="rateMovie('<c:out value="${filme.idfilme}" />', '2');" />
-							<label for="rating-input-<c:out value="${filme.idfilme}"/>-2"
-							class="rating-star"></label> <input type="radio"
-							class="rating-input"
-							id="rating-input-<c:out value="${filme.idfilme}"/>-1"
-							name="rating-input-<c:out value="${filme.idfilme}"/>"
-							onclick="rateMovie('<c:out value="${filme.idfilme}" />', '1');" />
-							<label for="rating-input-<c:out value="${filme.idfilme}"/>-1"
-							class="rating-star"></label>
+						<span><c:out value="${filme.titulofilme}" /></span> <br /> 
+						<span class="star-rating">
+							<c:forEach var="i" begin="1" end="5">
+								<input type="radio" <c:out value="${ratings[myIndex.index].nota == i ? 'checked' : ''}"/> name="<c:out value="${filme.idfilme}"/>" value="${i}"><i></i>
+							</c:forEach>
 						</span>
 					</div>
 				</div>

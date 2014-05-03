@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import br.ufu.facom.lsi.dto.AvaliacaoDTO;
 import br.ufu.facom.lsi.dto.JsonResponse;
 import br.ufu.facom.lsi.exception.UserNotFoundException;
+import br.ufu.facom.lsi.model.AvaliacaoFilme;
 import br.ufu.facom.lsi.model.Filme;
 import br.ufu.facom.lsi.model.Usuario;
 import br.ufu.facom.lsi.repository.UserConnectionRepository;
@@ -55,7 +56,7 @@ public class FacebookController {
 
 	private List<Filme> filmesParaAvaliar;
 
-	@RequestMapping(method = RequestMethod.GET)
+	@RequestMapping("*")
 	public String home(HttpServletRequest request) {
 
 		return "home";
@@ -74,10 +75,15 @@ public class FacebookController {
 				String accessToken = this.fetchAccessToken();
 
 				Usuario u = this.fbService.saveUsuario(accessToken);
-				this.fbService.getFbProfile(u, accessToken);
+				// TODO uncomment
+				// this.fbService.getFbProfile(u, accessToken);
 
 				List<Filme> filmes = retrieveMoviesToScore();
 				model.addAttribute("filmes", filmes);
+
+				List<AvaliacaoFilme> ratings = retrieveRatings(u, filmes);
+				model.addAttribute("ratings", ratings);
+
 				nextView = "show-movies";
 
 			} catch (Exception e) {
@@ -92,6 +98,19 @@ public class FacebookController {
 
 		return nextView;
 
+	}
+
+	private List<AvaliacaoFilme> retrieveRatings(Usuario u, List<Filme> filmes) {
+
+		List<AvaliacaoFilme> ratings = new ArrayList<AvaliacaoFilme>(this.filmesParaAvaliar.size());
+		try {
+			
+			ratings = movieService.fetchDefaultRatings(u, filmes);
+
+		} catch (Exception e) {
+			logger.warn("Could not retrieve default ratings!", e);
+		}
+		return ratings;
 	}
 
 	private String fetchAccessToken() throws UserNotFoundException {
@@ -114,11 +133,12 @@ public class FacebookController {
 
 			this.filmesParaAvaliar = new ArrayList<Filme>();
 			for (Filme f : filmes) {
-				
-				if(f.getTitulofilme().length() > 15){
-					f.setTitulofilme(f.getTitulofilme().substring(0, 13).concat("..."));
+
+				if (f.getTitulofilme().length() > 15) {
+					f.setTitulofilme(f.getTitulofilme().substring(0, 13)
+							.concat("..."));
 				}
-				
+
 				f.setImgfilmeString(new String(Base64.encodeBase64(f
 						.getImgfilme())));
 

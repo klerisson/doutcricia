@@ -55,7 +55,7 @@
 		<div id="bigphoto" class="seven columns add-bottom offset-by-one">
 			<img src="static/p3.png">
 		</div>
-		<div style="clear: both;"></div>
+		<div class="clear"></div>
 		<br />
 		
 		<div id="rodape">

@@ -47,34 +47,34 @@
 				pesquisa a qualquer momento sem nenhum prejuízo ou coação.</p>
 			<br />
 
-
-			<form action="filmes" method="get">
-				<input type="submit" value="Participar" />
-			</form>
-
+			
+			<input type=button onClick="location.href='filmes'" value='Participar!'>
 
 		</div>
 
 		<div id="bigphoto" class="seven columns add-bottom offset-by-one">
 			<img src="static/p3.png">
 		</div>
+		<div style="clear: both;"></div>
+		<br />
+		
+		<div id="rodape">
+			<div id="logo_ufu" class="sixteen columns">
+				<a href="http://www.ufu.br/"
+					title="Universidade Federal de UberlÃ¢ndia"> <img
+					src="static/ufu-logo.png" />
+				</a>
 
-	</div>
-	<div id="rodape">
-		<div id="logo_ufu" class="sixteen columns">
-			<a href="http://www.ufu.br/"
-				title="Universidade Federal de UberlÃ¢ndia">
-				<img src="static/ufu-logo.png" />	
-			</a>
-			
+			</div>
+			Laboratório de Sistemas de Informação <br> <a
+				href="http://www.facom.ufu.br/">Faculdade de Computação - </a><a
+				href="http://www.ufu.br/">Universidade Federal de Uberlândia</a> <br>Av.
+			João Naves de Ávila, 2121, Campus Santa Mônica - Bloco 5K <br>CEP:
+			38.400-902 - Uberlândia - Minas Gerais - Brasil<br>Fone: 55 (34)
+			3239-4568<br>&nbsp;<br>&nbsp;
 		</div>
-		Laboratório de Sistemas de Informação <br> <a
-			href="http://www.facom.ufu.br/">Faculdade de Computação - </a><a
-			href="http://www.ufu.br/">Universidade Federal de Uberlândia</a> <br>Av.
-		João Naves de Ávila, 2121, Campus Santa Mônica - Bloco 5K <br>CEP:
-		38.400-902 - Uberlândia - Minas Gerais - Brasil<br>Fone: 55 (34)
-		3239-4568<br>&nbsp;<br>&nbsp;
 	</div>
+
 
 
 

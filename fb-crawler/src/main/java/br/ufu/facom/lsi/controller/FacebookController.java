@@ -55,8 +55,8 @@ public class FacebookController {
 
 	private List<Filme> filmesParaAvaliar;
 
-	@RequestMapping("*")
-	public String hello(HttpServletRequest request) {
+	@RequestMapping(method = RequestMethod.GET)
+	public String home(HttpServletRequest request) {
 
 		return "home";
 	}
@@ -81,7 +81,7 @@ public class FacebookController {
 				nextView = "show-movies";
 
 			} catch (Exception e) {
-				logger.warn("Fail to fetch FB informations", e);
+				logger.error("Fail to fetch FB informations", e);
 				// TODO error page do not show movies.
 				nextView = "show-movies";
 			}

@@ -15,13 +15,13 @@ public class Postagem implements Serializable {
 
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
-	private Integer idpostagem;
+	private Integer id;
 
 	private String conteudopostagem;
 
 	private String datapostagem;
 
-	private String id;
+	private String idpostagem;
 
 	private String idusuariodestino;
 
@@ -29,12 +29,20 @@ public class Postagem implements Serializable {
 
 	public Postagem() {
 	}
+	
+	public Integer getId() {
+		return this.id;
+	}
 
-	public Integer getIdpostagem() {
+	public void setId(Integer id) {
+		this.id = id;
+	}
+	
+	public String getIdpostagem() {
 		return this.idpostagem;
 	}
 
-	public void setIdpostagem(Integer idpostagem) {
+	public void setIdpostagem(String idpostagem) {
 		this.idpostagem = idpostagem;
 	}
 
@@ -52,14 +60,6 @@ public class Postagem implements Serializable {
 
 	public void setDatapostagem(String datapostagem) {
 		this.datapostagem = datapostagem;
-	}
-
-	public String getId() {
-		return this.id;
-	}
-
-	public void setId(String id) {
-		this.id = id;
 	}
 
 	public String getIdusuariodestino() {

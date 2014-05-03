@@ -205,17 +205,18 @@ public class FacebookServiceImpl implements FacebookService {
 
 					EstudaEm ee = new EstudaEm();
 					if (ede.getSchool() != null) {
-						ee.setIdlocalestudo(ede.getSchool().getName());
+						ee.setIdlocalestudo(ede.getSchool().getId());
 						ee.setTokenusuario(u.getTokenusuario());
+						ee.setNomelocalestudo(ede.getSchool().getName());
 						if (ede.getYear() != null) {
 							ee.setAnoturma(ede.getYear().getName());
 						}
+						
+						List<EstudaEm> temp = this.estudaEmRepository.findByidlocalestudoAndTokenusuario(ede
+								.getSchool().getId(), u.getTokenusuario());
 
-						EstudaEm temp = this.estudaEmRepository.findByFbId(ede
-								.getSchool().getId());
-
-						if (temp != null) {
-							ee.setId(temp.getId());
+						if (temp != null && temp.size() > 0) {
+							ee.setId(temp.get(0).getId());
 						}
 
 					} else {
@@ -241,19 +242,20 @@ public class FacebookServiceImpl implements FacebookService {
 					Postagem po = new Postagem();
 
 					try {
-
+						
 						List<Postagem> poTemp = this.postagemRepository
-								.findByIdAndConteudopostagem(
-										u.getTokenusuario(), p.getMessage());
+								.findByIdpostagemAndConteudopostagemAndIdusuarioorigem(
+										p.getId(), p.getMessage(), u.getTokenusuario());
+						
 						if (!poTemp.isEmpty()) {
-							po.setIdpostagem(poTemp.get(0).getIdpostagem());
+							po.setId(poTemp.get(0).getId());
 						}
 
 					} catch (Exception e) {
-						logger.warn("Postagem nao recuperada.", e);
+						logger.warn("Postagem nao recuperada. Possível nova postagem.", e);
 					}
 
-					po.setId(p.getId());
+					po.setIdpostagem(p.getId());
 					po.setConteudopostagem(p.getMessage());
 
 					try {
@@ -288,21 +290,23 @@ public class FacebookServiceImpl implements FacebookService {
 					PagedList<Reference> plr = facebook.likeOperations()
 							.getLikes(p.getId());
 					PagingParameters pparam = null;
+					
 					for (;;) {
 
 						for (Reference r : plr) {
 							LikePostagem lp = new LikePostagem();
-							lp.setIdpost(po.getId());
+							lp.setIdpost(po.getIdpostagem());
 							lp.setIdusuariolike(r.getId());
 
 							try {
 
 								List<LikePostagem> lpTemp = this.likePostagemRepository
 										.findByIdpostAndIdusuariolike(
-												po.getId(), r.getId());
+												po.getIdpostagem(), r.getId());
+								
 								if (!lpTemp.isEmpty()) {
 									lp.setId(lpTemp.get(0).getId());
-								}
+								} 
 
 							} catch (Exception e) {
 								logger.warn(

@@ -50,7 +50,7 @@ import br.ufu.facom.lsi.service.SocialContext;
 import com.jolbox.bonecp.BoneCPDataSource;
 
 @Configuration
-@ComponentScan(basePackages = { "br.ufu.facom.lsi" })
+@ComponentScan(basePackages = {"br.ufu.facom.lsi"})
 @EnableWebMvc
 @EnableAsync
 @ImportResource("classpath:applicationContext.xml")

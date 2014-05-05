@@ -62,7 +62,7 @@ public class FacebookController {
 		return "home";
 	}
 
-	@RequestMapping(value = "filmes", method = RequestMethod.GET)
+	@RequestMapping(value = "filmes", method = RequestMethod.POST)
 	public String showMoviesList(HttpServletRequest request,
 			HttpServletResponse response, Model model) throws Exception {
 

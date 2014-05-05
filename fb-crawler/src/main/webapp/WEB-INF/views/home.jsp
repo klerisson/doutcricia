@@ -47,8 +47,9 @@
 				pesquisa a qualquer momento sem nenhum prejuízo ou coação.</p>
 			<br />
 
-			
-			<input type=button onClick="location.href='filmes'" value='Participar!'>
+			<form name="filmes" action="filmes" method="post">
+				<input type="submit" value="Participar!">
+			</form>
 
 		</div>
 
@@ -57,7 +58,7 @@
 		</div>
 		<div class="clear"></div>
 		<br />
-		
+
 		<div id="rodape">
 			<div id="logo_ufu" class="sixteen columns">
 				<a href="http://www.ufu.br/"

@@ -2,6 +2,7 @@ package br.ufu.facom.lsi.model;
 
 import java.io.Serializable;
 import javax.persistence.*;
+import java.util.List;
 
 
 /**
@@ -23,27 +24,23 @@ public class Postagem implements Serializable {
 
 	private String idpostagem;
 
-	private String idusuariodestino;
-
 	private String idusuarioorigem;
+
+	private String idusuariocorrente;
+	
+	//bi-directional many-to-one association to PostagemDestino
+	@OneToMany(mappedBy="postagem", fetch=FetchType.EAGER)
+	private List<PostagemDestino> postagemDestinos;
 
 	public Postagem() {
 	}
-	
+
 	public Integer getId() {
 		return this.id;
 	}
 
 	public void setId(Integer id) {
 		this.id = id;
-	}
-	
-	public String getIdpostagem() {
-		return this.idpostagem;
-	}
-
-	public void setIdpostagem(String idpostagem) {
-		this.idpostagem = idpostagem;
 	}
 
 	public String getConteudopostagem() {
@@ -62,12 +59,20 @@ public class Postagem implements Serializable {
 		this.datapostagem = datapostagem;
 	}
 
-	public String getIdusuariodestino() {
-		return this.idusuariodestino;
+	public String getIdpostagem() {
+		return this.idpostagem;
 	}
 
-	public void setIdusuariodestino(String idusuariodestino) {
-		this.idusuariodestino = idusuariodestino;
+	public void setIdpostagem(String idpostagem) {
+		this.idpostagem = idpostagem;
+	}
+
+	public String getIdusuariocorrente() {
+		return this.idusuariocorrente;
+	}
+
+	public void setIdusuariocorrente(String idusuariocorrente) {
+		this.idusuariocorrente = idusuariocorrente;
 	}
 
 	public String getIdusuarioorigem() {
@@ -76,6 +81,28 @@ public class Postagem implements Serializable {
 
 	public void setIdusuarioorigem(String idusuarioorigem) {
 		this.idusuarioorigem = idusuarioorigem;
+	}
+
+	public List<PostagemDestino> getPostagemDestinos() {
+		return this.postagemDestinos;
+	}
+
+	public void setPostagemDestinos(List<PostagemDestino> postagemDestinos) {
+		this.postagemDestinos = postagemDestinos;
+	}
+
+	public PostagemDestino addPostagemDestino(PostagemDestino postagemDestino) {
+		getPostagemDestinos().add(postagemDestino);
+		postagemDestino.setPostagem(this);
+
+		return postagemDestino;
+	}
+
+	public PostagemDestino removePostagemDestino(PostagemDestino postagemDestino) {
+		getPostagemDestinos().remove(postagemDestino);
+		postagemDestino.setPostagem(null);
+
+		return postagemDestino;
 	}
 
 }

@@ -4,6 +4,9 @@
 <head>
 <title>Home</title>
 
+<link rel="icon" href="favicon.ico" type="image/x-icon" />
+<link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
+
 <link href="<c:url value="/static/base.css" />" rel="stylesheet">
 <link href="<c:url value="/static/skeleton.css" />" rel="stylesheet">
 <link href="<c:url value="/static/layout.css" />" rel="stylesheet">

@@ -5,6 +5,10 @@
 <head>
 <title>Home</title>
 
+<link rel="icon" href="favicon.ico" type="image/x-icon" />
+<link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
+
+
 <script src="<c:url value="/static/jquery-1.9.1.min.js" />"></script>
 <link href="<c:url value="/static/rating.css" />" rel="stylesheet">
 <link href="<c:url value="/static/base.css" />" rel="stylesheet">

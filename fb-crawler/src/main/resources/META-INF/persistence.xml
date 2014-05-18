@@ -12,6 +12,7 @@
 		<class>br.ufu.facom.lsi.model.CompartilhaPostagem</class>
 		<class>br.ufu.facom.lsi.model.LikePostagem</class>
 		<class>br.ufu.facom.lsi.model.Postagem</class>
+		<class>br.ufu.facom.lsi.model.PostagemDestino</class>
 		<class>br.ufu.facom.lsi.model.Usuario</class>
 		<class>br.ufu.facom.lsi.model.Amizade</class>
 		<class>br.ufu.facom.lsi.model.Userconnection</class>

@@ -8,7 +8,6 @@ import br.ufu.facom.lsi.model.Postagem;
 
 public interface PostagemRepository extends JpaRepository<Postagem, Integer> {
 
-	//public List<Postagem> findByIdpostagem(Integer idpostagem);
+	public List<Postagem> findByIdpostagem(String idpostagem);
 
-	public List<Postagem> findByIdpostagemAndConteudopostagemAndIdusuarioorigem(String idpostagem, String conteudopostagem, String idusuarioorigem);
 }

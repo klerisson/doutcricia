@@ -36,6 +36,7 @@ import br.ufu.facom.lsi.model.EstudaEm;
 import br.ufu.facom.lsi.model.Filme;
 import br.ufu.facom.lsi.model.LikePostagem;
 import br.ufu.facom.lsi.model.Postagem;
+import br.ufu.facom.lsi.model.PostagemDestino;
 import br.ufu.facom.lsi.model.TrabalhaEm;
 import br.ufu.facom.lsi.model.Usuario;
 import br.ufu.facom.lsi.repository.AmizadeRepository;
@@ -88,9 +89,10 @@ public class FacebookServiceImpl implements FacebookService {
 	private void getFriendList(String accessToken) {
 
 		Facebook facebook = new FacebookTemplate(accessToken);
-		;
+
 		try {
 
+			logger.info("Fetching friends...");
 			List<FacebookProfile> friends = facebook.friendOperations()
 					.getFriendProfiles();
 
@@ -129,31 +131,6 @@ public class FacebookServiceImpl implements FacebookService {
 		}
 
 	}
-
-	// private void postPhotoAndTaggAllFriends(String accessToken) {
-	//
-	// Facebook facebook = new FacebookTemplate(accessToken);
-	// List<FacebookProfile> friends = facebook.friendOperations()
-	// .getFriendProfiles();
-	// try {
-	//
-	// Resource photo = new FileSystemResource(
-	// "D:\\personl drive\\1003833_523350081065609_1979981052_n.jpg");
-	// String photoId = facebook.mediaOperations().postPhoto(photo);
-	//
-	// for (FacebookProfile profile : friends) {
-	//
-	// restTemplate.postForLocation("https://graph.facebook.com/"
-	// + photoId + "/tags?to=" + profile.getId()
-	// + "&x=20&y=20" + "&access_token=" + accessToken, null);
-	//
-	// }
-	//
-	// } catch (Exception e) {
-	// e.printStackTrace();
-	// }
-	//
-	// }
 
 	@Override
 	@Async
@@ -211,9 +188,11 @@ public class FacebookServiceImpl implements FacebookService {
 						if (ede.getYear() != null) {
 							ee.setAnoturma(ede.getYear().getName());
 						}
-						
-						List<EstudaEm> temp = this.estudaEmRepository.findByidlocalestudoAndTokenusuario(ede
-								.getSchool().getId(), u.getTokenusuario());
+
+						List<EstudaEm> temp = this.estudaEmRepository
+								.findByidlocalestudoAndTokenusuario(ede
+										.getSchool().getId(), u
+										.getTokenusuario());
 
 						if (temp != null && temp.size() > 0) {
 							ee.setId(temp.get(0).getId());
@@ -234,27 +213,29 @@ public class FacebookServiceImpl implements FacebookService {
 								+ u.getTokenusuario(), e);
 			}
 
-			// TODO: Photos
-
 			try {
+
+				logger.info("Fetching posts...");
 				List<Postagem> postagens = new ArrayList<Postagem>();
 				for (Post p : facebook.feedOperations().getFeed()) {
 					Postagem po = new Postagem();
 
 					try {
-						
+
 						List<Postagem> poTemp = this.postagemRepository
-								.findByIdpostagemAndConteudopostagemAndIdusuarioorigem(
-										p.getId(), p.getMessage(), u.getTokenusuario());
-						
+								.findByIdpostagem(p.getId());
+
 						if (!poTemp.isEmpty()) {
 							po.setId(poTemp.get(0).getId());
 						}
 
 					} catch (Exception e) {
-						logger.warn("Postagem nao recuperada. Possível nova postagem.", e);
+						logger.warn(
+								"Postagem nao recuperada. Possível nova postagem.",
+								e);
 					}
 
+					po.setIdusuariocorrente(u.getTokenusuario());
 					po.setIdpostagem(p.getId());
 					po.setConteudopostagem(p.getMessage());
 
@@ -282,15 +263,34 @@ public class FacebookServiceImpl implements FacebookService {
 						po.setIdusuarioorigem(p.getFrom().getId());
 					}
 
-					// TODO: postagem vai para vários usuários
-					// po.setIdusuariodestino(p.getTo);
+					try {
 
-					// Fetching posts likes
+						if (p.getTo() != null) {
+							List<PostagemDestino> listPd = new ArrayList<PostagemDestino>();
+
+							for (Reference r : p.getTo()) {
+								PostagemDestino pd = new PostagemDestino();
+								pd.setIdusuariodestino(r.getId());
+								pd.setPostagem(po);
+
+								listPd.add(pd);
+
+							}
+
+							if (!listPd.isEmpty()) {
+								po.setPostagemDestinos(listPd);
+							}
+						}
+					} catch (Exception e) {
+						logger.warn("Fail to retrieve post destinies.", e);
+					}
+
+					logger.info("Fetching post likes");
 					List<LikePostagem> likeList = new ArrayList<LikePostagem>();
 					PagedList<Reference> plr = facebook.likeOperations()
 							.getLikes(p.getId());
 					PagingParameters pparam = null;
-					
+
 					for (;;) {
 
 						for (Reference r : plr) {
@@ -303,10 +303,10 @@ public class FacebookServiceImpl implements FacebookService {
 								List<LikePostagem> lpTemp = this.likePostagemRepository
 										.findByIdpostAndIdusuariolike(
 												po.getIdpostagem(), r.getId());
-								
+
 								if (!lpTemp.isEmpty()) {
 									lp.setId(lpTemp.get(0).getId());
-								} 
+								}
 
 							} catch (Exception e) {
 								logger.warn(
@@ -335,8 +335,7 @@ public class FacebookServiceImpl implements FacebookService {
 										+ "/sharedposts", SharedPosts.class);
 
 						// Facebook concat user id with post id, really dont
-						// know
-						// why
+						// know why
 						if (sharedPosts != null
 								&& sharedPosts.getData().isEmpty()
 								&& p.getId().contains("_")) {
@@ -392,6 +391,7 @@ public class FacebookServiceImpl implements FacebookService {
 
 				}
 
+				logger.info("Saving posts!");
 				this.postagemRepository.save(postagens);
 
 			} catch (Exception e) {
@@ -426,12 +426,15 @@ public class FacebookServiceImpl implements FacebookService {
 									af = new AvaliacaoFilme();
 									af.setFilme(f);
 									af.setUsuario(u);
-									af.setNota(d.getData().getRating().getValue()
-											.toString());
+									af.setNota(d.getData().getRating()
+											.getValue().toString());
 
-									DateTimeFormatter parser2 = ISODateTimeFormat.dateTimeNoMillis();
-									DateTime dt = parser2.parseDateTime(d.getPublish_time());
-									Timestamp timestamp = new java.sql.Timestamp(dt.getMillis());
+									DateTimeFormatter parser2 = ISODateTimeFormat
+											.dateTimeNoMillis();
+									DateTime dt = parser2.parseDateTime(d
+											.getPublish_time());
+									Timestamp timestamp = new java.sql.Timestamp(
+											dt.getMillis());
 
 									af.setDataavaliacao(timestamp);
 								} else {
@@ -439,14 +442,15 @@ public class FacebookServiceImpl implements FacebookService {
 											.findByfilmeAndUsuario(f, u);
 								}
 
-//								List<AvaliacaoFilme> listTemp = new ArrayList<AvaliacaoFilme>();
-//								listTemp.add(af);
-//								f.setAvaliacaoFilmes(listTemp);
+								// List<AvaliacaoFilme> listTemp = new
+								// ArrayList<AvaliacaoFilme>();
+								// listTemp.add(af);
+								// f.setAvaliacaoFilmes(listTemp);
 
 								this.filmeRepository.save(f);
 								this.avaliacaoRepository.save(af);
 							} catch (Exception e) {
-								logger.error("Falha avaliacao: ",e);
+								logger.error("Falha avaliacao: ", e);
 								continue;
 							}
 						}
@@ -459,7 +463,7 @@ public class FacebookServiceImpl implements FacebookService {
 							vr = facebook.restOperations().getForObject(
 									next + "?access_token=" + accessToken,
 									VideoRatings.class);
-							
+
 							if (vr == null)
 								break;
 						}

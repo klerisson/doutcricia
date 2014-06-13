@@ -45,6 +45,7 @@ import br.ufu.facom.lsi.repository.CompartilhaPostagemRepository;
 import br.ufu.facom.lsi.repository.EstudaEmRepository;
 import br.ufu.facom.lsi.repository.FilmeRepository;
 import br.ufu.facom.lsi.repository.LikePostagemRepository;
+import br.ufu.facom.lsi.repository.PostagemDestinoRepository;
 import br.ufu.facom.lsi.repository.PostagemRepository;
 import br.ufu.facom.lsi.repository.TrabalhaEmRepository;
 import br.ufu.facom.lsi.repository.UsuarioRepository;
@@ -76,6 +77,9 @@ public class FacebookServiceImpl implements FacebookService {
 
 	@Autowired
 	private PostagemRepository postagemRepository;
+
+	@Autowired
+	private PostagemDestinoRepository postagemDestinoRepository;
 
 	@Autowired
 	private FilmeRepository filmeRepository;
@@ -272,7 +276,21 @@ public class FacebookServiceImpl implements FacebookService {
 								PostagemDestino pd = new PostagemDestino();
 								pd.setIdusuariodestino(r.getId());
 								pd.setPostagem(po);
-
+								
+								try{
+									
+									List<PostagemDestino> temp = this.postagemDestinoRepository.findByIdusuariodestinoAndPostagem(r.getId(), po);
+									
+									if(temp != null && temp.get(0) != null){
+										pd.setId(temp.get(0).getId());
+									}
+							
+								} catch(Exception e) {
+									logger.warn("Postagem Destino falha: ",e);
+								}
+								
+								pd = this.postagemDestinoRepository.save(pd);							
+								
 								listPd.add(pd);
 
 							}

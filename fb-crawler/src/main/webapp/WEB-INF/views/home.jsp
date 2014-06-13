@@ -4,9 +4,8 @@
 <head>
 <title>Home</title>
 
-<link rel="icon" href="favicon.ico" type="image/x-icon" />
-<link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
-
+<link rel="icon" href="/static/favicon.ico" type="image/x-icon" />
+<link rel="shortcut icon" href="/static/favicon.ico" type="image/x-icon" />
 <link href="<c:url value="/static/base.css" />" rel="stylesheet">
 <link href="<c:url value="/static/skeleton.css" />" rel="stylesheet">
 <link href="<c:url value="/static/layout.css" />" rel="stylesheet">
@@ -24,6 +23,7 @@
 		<div id="nav" class="sixteen columns">
 			<ul>
 				<li><a href="#">Home</a></li>
+				<li><a href="privacy">Política de Privacidade</a></li>
 				<li><a href="http://lsi.facom.ufu.br/sobre">Sobre</a></li>
 				<li><a href="http://lsi.facom.ufu.br/equipe/">Contato</a></li>
 			</ul>

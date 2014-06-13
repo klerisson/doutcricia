@@ -5,8 +5,8 @@
 <head>
 <title>Home</title>
 
-<link rel="icon" href="favicon.ico" type="image/x-icon" />
-<link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
+<link rel="icon" href="/static/favicon.ico" type="image/x-icon" />
+<link rel="shortcut icon" href="/static/favicon.ico" type="image/x-icon" />
 
 
 <script src="<c:url value="/static/jquery-1.9.1.min.js" />"></script>
@@ -67,6 +67,7 @@ $(document).ready(function(){
 		<div id="nav" class="sixteen columns">
 			<ul>
 				<li><a href="home">Home</a></li>
+				<li><a href="privacy">Política de Privacidade</a></li>
 				<li><a href="http://lsi.facom.ufu.br/sobre">Sobre</a></li>
 				<li><a href="http://lsi.facom.ufu.br/equipe/">Contato</a></li>
 			</ul>

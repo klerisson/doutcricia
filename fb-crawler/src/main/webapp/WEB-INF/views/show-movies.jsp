@@ -90,6 +90,7 @@ $(document).ready(function(){
 					</div>
 				</div>
 			</c:forEach>
+			<br class="clear" />
 			<div align="center">
 				<br />
 				<br />

@@ -78,8 +78,8 @@ $(document).ready(function(){
 				<div class="filmeItem">
 					<img
 						src="data:image/jpeg;base64,<c:out value="${filme.imgfilmeString}"/>"
-						alt="<c:out value="${filme.titulofilme}" />"
-						title="<c:out value="${filme.titulofilme}" />" /><br />
+						alt="<c:out value="${filme.tituloCompleto}" />"
+						title="<c:out value="${filme.tituloCompleto}" />" /><br />
 					<div>
 						<span><c:out value="${filme.titulofilme}" /></span> <br /> 
 						<span class="star-rating">

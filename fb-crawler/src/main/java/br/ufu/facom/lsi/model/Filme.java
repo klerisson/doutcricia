@@ -53,6 +53,9 @@ public class Filme implements Serializable {
 	
 	@Transient
 	private String imgfilmeString;
+	
+	@Transient
+	private String tituloCompleto;
 
 	public Filme() {
 	}
@@ -157,6 +160,14 @@ public class Filme implements Serializable {
 
 	public void setImgfilmeString(String imgfilmeString) {
 		this.imgfilmeString = imgfilmeString;
+	}
+
+	public String getTituloCompleto() {
+		return tituloCompleto;
+	}
+
+	public void setTituloCompleto(String tituloCompleto) {
+		this.tituloCompleto = tituloCompleto;
 	}
 
 }

@@ -138,7 +138,8 @@ public class FacebookController {
 
 			this.filmesParaAvaliar = new ArrayList<Filme>();
 			for (Filme f : filmes) {
-
+				
+				f.setTituloCompleto(f.getTitulofilme());
 				if (f.getTitulofilme().length() > 15) {
 					f.setTitulofilme(f.getTitulofilme().substring(0, 13)
 							.concat("..."));

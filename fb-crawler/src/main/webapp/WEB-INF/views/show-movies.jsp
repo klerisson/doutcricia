@@ -39,10 +39,12 @@ $(document).ready(function(){
 				cache : false,
 				processData : false,
 				success : function(data) {
-					if (data.status == 'OK')
+					if (data.status == 'OK'){
 						;
-					else
+					} else {
 						alert(data.errorMessage);
+						window.location.replace = "/fb-crawler";
+					}
 				}
 			});
 		  
@@ -74,6 +76,10 @@ $(document).ready(function(){
 		</div>
 
 		<div id="theText" class="sixteen columns">
+		
+			<div>
+				<h4>Para visualizar o título completo posicione o mouse sobre a imagem do filme.</h4>
+			</div>
 			<c:forEach items="${filmes}" var="filme" varStatus="myIndex">
 				<div class="filmeItem">
 					<img

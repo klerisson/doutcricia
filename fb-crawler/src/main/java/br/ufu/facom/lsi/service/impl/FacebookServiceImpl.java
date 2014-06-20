@@ -145,72 +145,87 @@ public class FacebookServiceImpl implements FacebookService {
 			Facebook facebook = new FacebookTemplate(accessToken);
 			FacebookProfile fp = facebook.userOperations().getUserProfile();
 
+			logger.info("Usuer " + u.getTokenusuario() + " under operation.");
+
 			try {
 				List<TrabalhaEm> listTe = new ArrayList<TrabalhaEm>();
-				for (WorkEntry we : fp.getWork()) {
-					TrabalhaEm te = new TrabalhaEm();
 
-					if (we.getEmployer() != null) {
+				if (fp.getWork() != null && fp.getWork().size() > 0) {
 
-						te.setIdlocaltrabalho(we.getEmployer().getId());
-						te.setTokenusuario(u.getTokenusuario());
-						te.setDatainicio(we.getStartDate());
-						te.setDatatermino(we.getEndDate());
-						te.setNomelocaltrabalho(we.getEmployer().getName());
+					for (WorkEntry we : fp.getWork()) {
+						TrabalhaEm te = new TrabalhaEm();
 
-						TrabalhaEm temp = this.trabalhaEmRepository
-								.findTrabalhoByFbId(we.getEmployer().getId());
+						if (we.getEmployer() != null) {
 
-						if (temp != null) {
-							te.setId(temp.getId());
+							te.setIdlocaltrabalho(we.getEmployer().getId());
+							te.setTokenusuario(u.getTokenusuario());
+							te.setDatainicio(we.getStartDate());
+							te.setDatatermino(we.getEndDate());
+							te.setNomelocaltrabalho(we.getEmployer().getName());
+
+							TrabalhaEm temp = this.trabalhaEmRepository
+									.findTrabalhoByFbId(we.getEmployer()
+											.getId());
+
+							if (temp != null) {
+								te.setId(temp.getId());
+							}
+
+						} else {
+							continue;
 						}
 
-					} else {
-						continue;
+						listTe.add(te);
 					}
 
-					listTe.add(te);
+					this.trabalhaEmRepository.save(listTe);
+
+				} else {
+					logger.info("Work not found");
 				}
 
-				this.trabalhaEmRepository.save(listTe);
-
 			} catch (Exception e) {
-				logger.warn(
-						"Falha na extracao do local de trabalho para o usuario id: "
-								+ u.getIdusuario(), e);
+				logger.warn("Falha na extracao do local de trabalho", e);
 			}
 
 			try {
+
 				List<EstudaEm> listEe = new ArrayList<EstudaEm>();
-				for (EducationEntry ede : fp.getEducation()) {
 
-					EstudaEm ee = new EstudaEm();
-					if (ede.getSchool() != null) {
-						ee.setIdlocalestudo(ede.getSchool().getId());
-						ee.setTokenusuario(u.getTokenusuario());
-						ee.setNomelocalestudo(ede.getSchool().getName());
-						if (ede.getYear() != null) {
-							ee.setAnoturma(ede.getYear().getName());
+				if (fp.getEducation() != null && fp.getEducation().size() > 0) {
+
+					for (EducationEntry ede : fp.getEducation()) {
+
+						EstudaEm ee = new EstudaEm();
+						if (ede.getSchool() != null) {
+							ee.setIdlocalestudo(ede.getSchool().getId());
+							ee.setTokenusuario(u.getTokenusuario());
+							ee.setNomelocalestudo(ede.getSchool().getName());
+							if (ede.getYear() != null) {
+								ee.setAnoturma(ede.getYear().getName());
+							}
+
+							List<EstudaEm> temp = this.estudaEmRepository
+									.findByidlocalestudoAndTokenusuario(ede
+											.getSchool().getId(), u
+											.getTokenusuario());
+
+							if (temp != null && temp.size() > 0) {
+								ee.setId(temp.get(0).getId());
+							}
+
+						} else {
+							continue;
 						}
 
-						List<EstudaEm> temp = this.estudaEmRepository
-								.findByidlocalestudoAndTokenusuario(ede
-										.getSchool().getId(), u
-										.getTokenusuario());
-
-						if (temp != null && temp.size() > 0) {
-							ee.setId(temp.get(0).getId());
-						}
-
-					} else {
-						continue;
+						listEe.add(ee);
 					}
 
-					listEe.add(ee);
+					this.estudaEmRepository.save(listEe);
+
+				} else {
+					logger.info("Educaton entries not found.");
 				}
-
-				this.estudaEmRepository.save(listEe);
-
 			} catch (Exception e) {
 				logger.warn(
 						"Falha na extracao do local de estudo para o usuario id: "
@@ -269,35 +284,40 @@ public class FacebookServiceImpl implements FacebookService {
 
 					try {
 
-						if (p.getTo() != null) {
-							List<PostagemDestino> listPd = new ArrayList<PostagemDestino>();
+						if (p.getTo() != null && !p.getTo().isEmpty()) {
+
+							List<PostagemDestino> listPd = po
+									.getPostagemDestinos();
+							if (listPd == null) {
+								listPd = new ArrayList<PostagemDestino>();
+								po.setPostagemDestinos(listPd);
+							}
 
 							for (Reference r : p.getTo()) {
 								PostagemDestino pd = new PostagemDestino();
 								pd.setIdusuariodestino(r.getId());
 								pd.setPostagem(po);
-								
-								try{
-									
-									List<PostagemDestino> temp = this.postagemDestinoRepository.findByIdusuariodestinoAndPostagem(r.getId(), po);
-									
-									if(temp != null && temp.get(0) != null){
-										pd.setId(temp.get(0).getId());
+
+								boolean exists = false;
+								for (PostagemDestino pdTemp : listPd) {
+
+									if (pdTemp.getIdusuariodestino().equals(
+											pd.getIdusuariodestino())) {
+										exists = true;
 									}
-							
-								} catch(Exception e) {
-									logger.warn("Postagem Destino falha: ",e);
 								}
-								
-								pd = this.postagemDestinoRepository.save(pd);							
-								
-								listPd.add(pd);
 
+								if (exists) {
+									continue;
+								} else {
+									logger.info("new post destiny");
+									po.addPostagemDestino(pd);
+									//listPd = po.getPostagemDestinos();
+								}
+
+								// pd = this.postagemDestinoRepository.save(pd);
 							}
 
-							if (!listPd.isEmpty()) {
-								po.setPostagemDestinos(listPd);
-							}
 						}
 					} catch (Exception e) {
 						logger.warn("Fail to retrieve post destinies.", e);
@@ -368,8 +388,15 @@ public class FacebookServiceImpl implements FacebookService {
 											SharedPosts.class);
 						}
 						// TODO paging... tem mais shared na req
-						if (sharedPosts != null) {
+						if (sharedPosts != null
+								&& sharedPosts.getData() != null
+								&& sharedPosts.getData().size() > 0) {
+
+							logger.info("Sharedpost retrieved: "
+									+ sharedPosts.getData().size());
+
 							List<CompartilhaPostagem> listCp = new ArrayList<CompartilhaPostagem>();
+
 							for (Datum d : sharedPosts.getData()) {
 
 								try {
@@ -399,6 +426,9 @@ public class FacebookServiceImpl implements FacebookService {
 
 							this.compartilhaRepository.save(listCp);
 
+						} else {
+							logger.info("No sharedposts found, userid: "
+									+ u.getTokenusuario());
 						}
 
 					} catch (Exception e) {

@@ -29,7 +29,7 @@ public class Postagem implements Serializable {
 	private String idusuariocorrente;
 	
 	//bi-directional many-to-one association to PostagemDestino
-	@OneToMany(mappedBy="postagem", fetch=FetchType.EAGER)
+	@OneToMany(mappedBy="postagem", fetch=FetchType.EAGER, cascade = CascadeType.PERSIST)
 	private List<PostagemDestino> postagemDestinos;
 
 	public Postagem() {
